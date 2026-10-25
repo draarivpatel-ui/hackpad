@@ -1,0 +1,9 @@
+Reference,Quantity,Value,Footprint,Description,Manufacturer_Part_Number,Supplier
+U1,1,Seeed Studio XIAO RP2040,Module:Seeed_XIAO_RP2040_THT,RP2040 Dual-Core ARM Cortex-M0+ USB-C Microcontroller Module,102010428,Hackpad Kit / Seeed Studio
+SW1-SW9,9,Cherry MX / Gateron Mechanical Switch,Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB,5-Pin PCB Mount Mechanical Keyswitch,MX1A-E1NW,Hackpad Kit
+D1-D9,9,1N4148W,Diode_SMD:D_SOD-123,Fast Switching Diode 100V 150mA SOD-123 (Through-hole 1N4148 compatible),1N4148W-7-F,Hackpad Kit
+SW10,1,EC11 Rotary Encoder w/ Push Switch,Rotary_Encoder:RotaryEncoder_Alps_EC11E-Switch_Vertical_H20mm,Incremental Rotary Encoder 20 Detents with Momentary Push Switch,EC11E15244G1,Hackpad Kit
+U2,1,0.91 inch 128x32 SSD1306 I2C OLED,Display_OLED:SSD1306_128x32_0.91,4-Pin I2C Monochrome OLED Display Module (GND/VCC/SCL/SDA),SSD1306-128X32-I2C,Hackpad Kit
+LED1-LED4,4,SK6812 MINI-E RGB LED,LED_SMD:LED_SK6812MINI-E_PLCC4_3.2x2.8mm,Reverse-Mount Addressable Smart RGB LED,SK6812MINI-E,Hackpad Kit
+K1-K9,9,DSA 1u Keycap,Mechanical:Keycap_DSA_1u,1u PBT Blank Keycap for MX Stem,DSA-1U-PBT,Hackpad Kit
+H1-H4,4,M2x8mm Screw + M2x5mm Heat-Set Insert,MountingHole:MountingHole_2.2mm_M2_Pad_Via,M2 Brass Heat-Set Inserts and M2x8mm Socket Head Cap Screws,M2-INSERT-KIT,Hackpad Kit

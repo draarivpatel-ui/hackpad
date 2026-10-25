@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AarivPad v1.0 - 3x3 Mechanical Macropad Workbench & Hardware Inspector</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --panel: #121827;
+      --panel-alt: #182135;
+      --border: #26334d;
+      --text: #e6edf7;
+      --muted: #93a3bf;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.22);
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: radial-gradient(circle at 15% 10%, #152238 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      line-height: 1.45;
+      padding: 18px 24px 36px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 6px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .header-links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip-btn {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 7px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chip-btn:hover {
+      border-color: var(--accent);
+      background: #1e2b45;
+    }
+    .workbench-grid {
+      display: grid;
+      grid-template-columns: 390px 1fr 370px;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 1200px) {
+      .workbench-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: rgba(18, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+    .card-meta {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--muted);
+    }
+
+    /* Simulated Macropad Hardware Unit */
+    .macropad-shell {
+      position: relative;
+      width: 318px;
+      margin: 6px auto 12px;
+      padding: 18px 18px 20px;
+      border-radius: 18px;
+      background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+      border: 2px solid #334155;
+      box-shadow: 0 0 34px var(--underglow, rgba(56, 189, 248, 0.45)), inset 0 1px 2px rgba(255, 255, 255, 0.12);
+      transition: box-shadow 0.25s ease;
+    }
+    .top-deck {
+      display: grid;
+      grid-template-columns: 54px 1fr 68px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 8px 10px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+    }
+    .xiao-module {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      padding: 5px 4px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: #9ca3af;
+    }
+    .xiao-usb {
+      width: 22px;
+      height: 6px;
+      background: #94a3b8;
+      margin: -8px auto 4px;
+      border-radius: 2px;
+    }
+    .oled-bezel {
+      background: #020617;
+      border: 2px solid #1e293b;
+      border-radius: 6px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #oledCanvas {
+      width: 128px;
+      height: 32px;
+      image-rendering: pixelated;
+      background: #000;
+      border: 1px solid #0f172a;
+    }
+    .oled-caption {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+    .encoder-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .encoder-knob {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 30%, #475569, #0f172a 75%);
+      border: 2px solid #64748b;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.15s ease;
+    }
+    .encoder-indicator {
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      width: 3px;
+      height: 11px;
+      margin-left: -1.5px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .enc-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .enc-mini-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .enc-mini-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .switch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+    }
+    .keycap {
+      background: linear-gradient(180deg, #27354d 0%, #182234 100%);
+      border: 1px solid #3b4f70;
+      border-bottom: 4px solid #0d1522;
+      border-radius: 10px;
+      height: 74px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.06s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+    .keycap:hover {
+      border-color: var(--accent);
+    }
+    .keycap.active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
+    }
+    .key-top {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .key-main {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+    }
+    .key-sub {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: #93c5fd;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .layer-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .layer-pill {
+      flex: 1;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .layer-pill.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .terminal-feed {
+      background: #070a11;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+    .terminal-line {
+      color: #38bdf8;
+      margin-bottom: 3px;
+    }
+    .terminal-sub {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    /* Center column: Dual interactive 3D CAD + 2-Layer PCB viewports */
+    .viewport-tabs {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .tab-btn {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #06101e;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .canvas-stage {
+      position: relative;
+      background: #080c14;
+      border: 1px solid #1e293b;
+      border-radius: 9px;
+      overflow: hidden;
+      height: 360px;
+    }
+    #cadCanvas, #pcbCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    .stage-overlay {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      background: rgba(9, 13, 22, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+    .layer-toggles {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .layer-toggles label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    /* Right column: Spec sheet, Pinout, BOM */
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      margin-bottom: 12px;
+    }
+    .spec-table th, .spec-table td {
+      padding: 6px 7px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: left;
+    }
+    .spec-table th {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    .pin-tag {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--accent);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .drc-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #86efac;
+      padding: 8px 11px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="badge">Hackpad Mission</span>
+      <div>
+        <h1>AarivPad v1.0 - 3x3 Mechanical Macropad + EC11 + OLED</h1>
+        <div class="subtitle">Seeed XIAO RP2040 | 68x84mm 2-Layer KiCad 8 PCB | 4x SK6812 Underglow | KMK Firmware</div>
+      </div>
+    </div>
+    <div class="header-links">
+      <a class="chip-btn" href="pcb/gerbers/aarivpad-gerbers.zip" download>Download Gerbers (.zip)</a>
+      <a class="chip-btn" href="pcb/aarivpad.kicad_pcb" download>KiCad 8 PCB</a>
+      <a class="chip-btn" href="cad/aarivpad_case.scad" download>OpenSCAD Case</a>
+      <a class="chip-btn" href="firmware/code.py" download>KMK Firmware (code.py)</a>
+      <a class="chip-btn" href="pcb/bom.csv" download>BOM (.csv)</a>
+    </div>
+  </header>
+
+  <main class="workbench-grid">
+    <!-- COLUMN 1: Interactive Hardware & KMK Simulator -->
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">1. Live KMK Macropad Simulator</span>
+        <span class="card-meta">Click keys or press 1-9</span>
+      </div>
+
+      <div class="layer-bar">
+        <button class="layer-pill active" onclick="setLayer(0)">L0: GIT / TERM</button>
+        <button class="layer-pill" onclick="setLayer(1)">L1: MEDIA / RGB</button>
+        <button class="layer-pill" onclick="setLayer(2)">L2: KICAD / CAD</button>
+      </div>
+
+      <div class="macropad-shell" id="padShell">
+        <div class="top-deck">
+          <div class="xiao-module">
+            <div class="xiao-usb"></div>
+            <div>XIAO</div>
+            <div style="color:#38bdf8;font-weight:700;">RP2040</div>
+          </div>
+
+          <div class="oled-bezel">
+            <canvas id="oledCanvas" width="128" height="32"></canvas>
+            <div class="oled-caption">SSD1306 128x32 I2C (0x3C)</div>
+          </div>
+
+          <div class="encoder-zone">
+            <div class="encoder-knob" id="encKnob" onclick="triggerEncoder('PUSH')" title="Click to push EC11 switch">
+              <div class="encoder-indicator"></div>
+            </div>
+            <div class="enc-btns">
+              <button class="enc-mini-btn" onclick="triggerEncoder('CCW')">CCW</button>
+              <button class="enc-mini-btn" onclick="triggerEncoder('CW')">CW</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="switch-grid" id="switchGrid"></div>
+      </div>
+
+      <div class="terminal-feed">
+        <div class="terminal-line" id="hidOutput">&gt; Ready: SW1..SW9 matrix active (COL2ROW 1N4148W)</div>
+        <div class="terminal-sub" id="matrixTrace">Last Matrix Scan: None | Encoder Detent: 0 | Underglow: Hue 195 deg</div>
+      </div>
+    </section>
+
+    <!-- COLUMN 2: 3D CAD Enclosure & 2-Layer KiCad PCB Viewer -->
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">2. 3D CAD Assembly &amp; KiCad 8 PCB Inspector</span>
+        <div class="viewport-tabs">
+          <button class="tab-btn active" id="btnViewCad" onclick="switchMode('cad')">3D CAD Assembly</button>
+          <button class="tab-btn" id="btnViewPcb" onclick="switchMode('pcb')">2-Layer PCB Layout</button>
+        </div>
+      </div>
+
+      <div class="canvas-stage">
+        <canvas id="cadCanvas" width="640" height="360"></canvas>
+        <canvas id="pcbCanvas" width="640" height="360" style="display:none;"></canvas>
+
+        <div class="stage-overlay" id="cadControls">
+          <div>
+            Explode Assembly:
+            <input type="range" id="explodeSlider" min="0" max="100" value="28" oninput="drawCad()" style="vertical-align:middle;width:110px;" />
+          </div>
+          <div>Drag canvas to orbit | 58g PLA (&lt;300g limit)</div>
+        </div>
+
+        <div class="stage-overlay" id="pcbControls" style="display:none;">
+          <div class="layer-toggles">
+            <label><input type="checkbox" id="chkFCu" checked onchange="drawPcb()" /><span class="swatch" style="background:#ef4444;"></span>F.Cu</label>
+            <label><input type="checkbox" id="chkBCu" checked onchange="drawPcb()" /><span class="swatch" style="background:#3b82f6;"></span>B.Cu</label>
+            <label><input type="checkbox" id="chkSilk" checked onchange="drawPcb()" /><span class="swatch" style="background:#f8fafc;"></span>F.SilkS</label>
+            <label><input type="checkbox" id="chkPours" checked onchange="drawPcb()" /><span class="swatch" style="background:#10b981;"></span>GND Pour</label>
+          </div>
+          <div>68.0 x 84.0 mm | 2-Layer FR4</div>
+        </div>
+      </div>
+
+      <div class="drc-banner">
+        <span>KiCad 8 DRC: 0 Errors, 0 Unconnected Nets, 39 Plated Drills</span>
+        <span>JLCPCB 2-Layer Ready</span>
+      </div>
+    </section>
+
+    <!-- COLUMN 3: XIAO RP2040 Pinout & Hackpad Kit BOM -->
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">3. XIAO RP2040 Wiring &amp; Kit BOM</span>
+        <span class="card-meta">10 GPIO nets used</span>
+      </div>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>XIAO Pin</th>
+            <th>Net Name</th>
+            <th>Connected Component</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="pin-tag">D0 / GPIO26</span></td><td>COL0</td><td>SW1, SW4, SW7 Col Bus</td></tr>
+          <tr><td><span class="pin-tag">D1 / GPIO27</span></td><td>COL1</td><td>SW2, SW5, SW8 Col Bus</td></tr>
+          <tr><td><span class="pin-tag">D2 / GPIO28</span></td><td>COL2</td><td>SW3, SW6, SW9 Col Bus</td></tr>
+          <tr><td><span class="pin-tag">D3 / GPIO29</span></td><td>ROW0</td><td>D1..D3 Cathode Row 0</td></tr>
+          <tr><td><span class="pin-tag">D6 / GPIO0</span></td><td>ROW1</td><td>D4..D6 Cathode Row 1</td></tr>
+          <tr><td><span class="pin-tag">D7 / GPIO1</span></td><td>ROW2</td><td>D7..D9 Cathode Row 2</td></tr>
+          <tr><td><span class="pin-tag">D4 / GPIO6</span></td><td>I2C_SDA</td><td>SSD1306 128x32 OLED SDA</td></tr>
+          <tr><td><span class="pin-tag">D5 / GPIO7</span></td><td>I2C_SCL</td><td>SSD1306 128x32 OLED SCL</td></tr>
+          <tr><td><span class="pin-tag">D8 / D9</span></td><td>ENC_A / B</td><td>EC11 Quadrature Phases</td></tr>
+          <tr><td><span class="pin-tag">D10 / GPIO3</span></td><td>ENC_SW</td><td>EC11 Push Switch + RGB</td></tr>
+        </tbody>
+      </table>
+
+      <div class="card-header" style="margin-top:10px;">
+        <span class="card-title">Bill of Materials (Hackpad Kit)</span>
+        <span class="card-meta">8 line items</span>
+      </div>
+      <table class="spec-table" style="margin-bottom:0;">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Qty</th>
+            <th>Part / Footprint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>U1</td><td>1</td><td>Seeed Studio XIAO RP2040</td></tr>
+          <tr><td>SW1-SW9</td><td>9</td><td>Cherry MX / Gateron 5-Pin Switches</td></tr>
+          <tr><td>D1-D9</td><td>9</td><td>1N4148W SOD-123 Switching Diodes</td></tr>
+          <tr><td>SW10</td><td>1</td><td>Alps EC11 Rotary Encoder w/ Switch</td></tr>
+          <tr><td>U2</td><td>1</td><td>0.91" 128x32 SSD1306 I2C OLED</td></tr>
+          <tr><td>LED1-4</td><td>4</td><td>SK6812 MINI-E Reverse-Mount RGB</td></tr>
+          <tr><td>K1-K9</td><td>9</td><td>DSA 1u PBT Blank Keycaps</td></tr>
+          <tr><td>H1-H4</td><td>4</td><td>M2x8mm Screws + M2x5mm Inserts</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    // Layer Definitions matching firmware/code.py
+    const LAYERS = [
+      {
+        name: "L0: GIT / TERM",
+        encDesc: "ENC:VOL  RGB:ON",
+        color: "#38bdf8",
+        keys: [
+          { sw: "SW1", label: "GIT ST", cmd: "git status", row: 0, col: 0 },
+          { sw: "SW2", label: "GIT DF", cmd: "git diff --stat", row: 0, col: 1 },
+          { sw: "SW3", label: "GIT LG", cmd: "git log --oneline -n 8", row: 0, col: 2 },
+          { sw: "SW4", label: "GIT PL", cmd: "git pull --rebase", row: 1, col: 0 },
+          { sw: "SW5", label: "COMMIT", cmd: 'git commit -m ""', row: 1, col: 1 },
+          { sw: "SW6", label: "GIT PS", cmd: "git push", row: 1, col: 2 },
+          { sw: "SW7", label: "TMUX",   cmd: "Ctrl+B (tmux prefix)", row: 2, col: 0 },
+          { sw: "SW8", label: "CLEAR",  cmd: "Ctrl+L (clear terminal)", row: 2, col: 1 },
+          { sw: "SW9", label: "LAYER+", cmd: "KC.TO(1) -> Media Layer", row: 2, col: 2, nextLayer: 1 }
+        ],
+        enc: { CCW: "KC.VOLD (Volume -2%)", CW: "KC.VOLU (Volume +2%)", PUSH: "KC.MUTE (Audio Mute)" }
+      },
+      {
+        name: "L1: MEDIA / RGB",
+        encDesc: "ENC:BRT  RGB:BRTH",
+        color: "#a855f7",
+        keys: [
+          { sw: "SW1", label: "PREV",   cmd: "KC.MPRV (Prev Track)", row: 0, col: 0 },
+          { sw: "SW2", label: "PLAY",   cmd: "KC.MPLY (Play/Pause)", row: 0, col: 1 },
+          { sw: "SW3", label: "NEXT",   cmd: "KC.MNXT (Next Track)", row: 0, col: 2 },
+          { sw: "SW4", label: "VOL -",  cmd: "KC.VOLD (Volume Down)", row: 1, col: 0 },
+          { sw: "SW5", label: "MUTE",   cmd: "KC.MUTE (Toggle Mute)", row: 1, col: 1 },
+          { sw: "SW6", label: "VOL +",  cmd: "KC.VOLU (Volume Up)", row: 1, col: 2 },
+          { sw: "SW7", label: "RGB TG", cmd: "KC.RGB_TOG (Toggle LEDs)", row: 2, col: 0 },
+          { sw: "SW8", label: "HUE +",  cmd: "KC.RGB_HUI (Shift Hue)", row: 2, col: 1 },
+          { sw: "SW9", label: "LAYER+", cmd: "KC.TO(2) -> KiCad Layer", row: 2, col: 2, nextLayer: 2 }
+        ],
+        enc: { CCW: "KC.RGB_VAD (Dim LEDs)", CW: "KC.RGB_VAI (Brighten LEDs)", PUSH: "KC.RGB_M_BR (Breathing)" }
+      },
+      {
+        name: "L2: KICAD / CAD",
+        encDesc: "ENC:ZOOM RGB:SYNC",
+        color: "#22c55e",
+        keys: [
+          { sw: "SW1", label: "FIT",    cmd: "KC.HOME (Zoom to Fit)", row: 0, col: 0 },
+          { sw: "SW2", label: "TOP VW", cmd: "KC.KP_7 (Top Ortho View)", row: 0, col: 1 },
+          { sw: "SW3", label: "FRT VW", cmd: "KC.KP_1 (Front Ortho View)", row: 0, col: 2 },
+          { sw: "SW4", label: "ROUTE",  cmd: "KC.X (Route New Track)", row: 1, col: 0 },
+          { sw: "SW5", label: "VIA",    cmd: "KC.V (Place Through Via)", row: 1, col: 1 },
+          { sw: "SW6", label: "POUR",   cmd: "KC.B (Refill Copper Zones)", row: 1, col: 2 },
+          { sw: "SW7", label: "3D VW",  cmd: "Alt+3 (KiCad 3D Viewer)", row: 2, col: 0 },
+          { sw: "SW8", label: "HELP",   cmd: "KC.F1 (Hotkeys List)", row: 2, col: 1 },
+          { sw: "SW9", label: "LAYER0", cmd: "KC.TO(0) -> Git Layer", row: 2, col: 2, nextLayer: 0 }
+        ],
+        enc: { CCW: "KC.MW_DN (Zoom Out)", CW: "KC.MW_UP (Zoom In)", PUSH: "KC.MB_MMB (Center Pan)" }
+      }
+    ];
+
+    let activeLayer = 0;
+    let encAngle = 0;
+    let encDetent = 0;
+    let lastKeyPressed = "READY";
+    let hueDeg = 195;
+    let audioCtx = null;
+
+    function playSwitchClick(freq = 1100) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.035);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.038);
+      } catch (e) {}
+    }
+
+    function renderKeys() {
+      const grid = document.getElementById("switchGrid");
+      const layer = LAYERS[activeLayer];
+      grid.innerHTML = "";
+      layer.keys.forEach((k, idx) => {
+        const btn = document.createElement("div");
+        btn.className = "keycap";
+        btn.id = `key-${idx}`;
+        btn.innerHTML = `
+          <div class="key-top"><span>${k.sw}</span><span>C${k.col}:R${k.row}</span></div>
+          <div class="key-main">${k.label}</div>
+          <div class="key-sub">D${idx + 1}</div>
+        `;
+        btn.addEventListener("click", () => pressKey(idx));
+        grid.appendChild(btn);
+      });
+      document.getElementById("padShell").style.setProperty("--underglow", `${layer.color}66`);
+      renderOled();
+    }
+
+    function setLayer(idx) {
+      activeLayer = idx;
+      document.querySelectorAll(".layer-pill").forEach((el, i) => {
+        el.classList.toggle("active", i === idx);
+      });
+      renderKeys();
+      drawCad();
+    }
+
+    function pressKey(idx) {
+      const layer = LAYERS[activeLayer];
+      const k = layer.keys[idx];
+      playSwitchClick(1250);
+      const el = document.getElementById(`key-${idx}`);
+      if (el) {
+        el.classList.add("active");
+        setTimeout(() => el.classList.remove("active"), 140);
+      }
+      lastKeyPressed = `${k.sw} (${k.label})`;
+      document.getElementById("hidOutput").textContent = `> HID Sent [${k.sw}]: ${k.cmd}`;
+      document.getElementById("matrixTrace").textContent =
+        `Matrix Scan: COL${k.col} (D${k.col}) -> ${k.sw} -> D${idx + 1} (1N4148W) -> ROW${k.row} | Detent: ${encDetent}`;
+
+      if (k.label === "HUE +") {
+        hueDeg = (hueDeg + 45) % 360;
+        document.getElementById("padShell").style.setProperty("--underglow", `hsla(${hueDeg}, 90%, 60%, 0.55)`);
+      }
+      if (typeof k.nextLayer === "number") {
+        setTimeout(() => setLayer(k.nextLayer), 150);
+      } else {
+        renderOled();
+      }
+    }
+
+    function triggerEncoder(dir) {
+      const layer = LAYERS[activeLayer];
+      playSwitchClick(dir === "PUSH" ? 900 : 1550);
+      if (dir === "CW") {
+        encAngle += 18;
+        encDetent += 1;
+      } else if (dir === "CCW") {
+        encAngle -= 18;
+        encDetent -= 1;
+      }
+      document.getElementById("encKnob").style.transform = `rotate(${encAngle}deg)`;
+      lastKeyPressed = `ENC ${dir}`;
+      document.getElementById("hidOutput").textContent = `> EC11 ${dir}: ${layer.enc[dir]}`;
+      document.getElementById("matrixTrace").textContent =
+        `EC11 Pins: A=D8, B=D9, SW=D10 | Detent Position: ${encDetent}`;
+      renderOled();
+    }
+
+    function renderOled() {
+      const cvs = document.getElementById("oledCanvas");
+      const ctx = cvs.getContext("2d");
+      const layer = LAYERS[activeLayer];
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, 128, 32);
+
+      // Top status bar
+      ctx.fillStyle = "#38bdf8";
+      ctx.font = "bold 8px monospace";
+      ctx.fillText("AARIVPAD v1.0", 2, 8);
+      ctx.fillText(`DET:${encDetent}`, 88, 8);
+
+      ctx.strokeStyle = "#1e293b";
+      ctx.beginPath();
+      ctx.moveTo(0, 10);
+      ctx.lineTo(128, 10);
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 9px monospace";
+      ctx.fillText(layer.name, 2, 20);
+
+      ctx.fillStyle = "#93c5fd";
+      ctx.font = "8px monospace";
+      ctx.fillText(`KEY: ${lastKeyPressed}`, 2, 30);
+    }
+
+    // Keyboard shortcuts 1-9
+    window.addEventListener("keydown", (e) => {
+      if (e.key >= "1" && e.key <= "9") {
+        pressKey(parseInt(e.key, 10) - 1);
+      }
+    });
+
+    // =========================================================================
+    // 3D CAD Isometric/Perspective Assembly Renderer
+    // =========================================================================
+    let cadRotX = 0.62;
+    let cadRotZ = -0.52;
+    let isDraggingCad = false;
+    let dragStart = { x: 0, y: 0 };
+
+    const cadCanvas = document.getElementById("cadCanvas");
+    cadCanvas.addEventListener("mousedown", (e) => {
+      isDraggingCad = true;
+      dragStart = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isDraggingCad) return;
+      cadRotZ += (e.clientX - dragStart.x) * 0.008;
+      cadRotX = Math.max(0.2, Math.min(1.35, cadRotX + (e.clientY - dragStart.y) * 0.008));
+      dragStart = { x: e.clientX, y: e.clientY };
+      drawCad();
+    });
+    window.addEventListener("mouseup", () => { isDraggingCad = false; });
+
+    function project3D(x, y, z, cx, cy, scale) {
+      const cosZ = Math.cos(cadRotZ), sinZ = Math.sin(cadRotZ);
+      const cosX = Math.cos(cadRotX), sinX = Math.sin(cadRotX);
+      const rx = x * cosZ - y * sinZ;
+      const ry = x * sinZ + y * cosZ;
+      const sx = cx + rx * scale;
+      const sy = cy + (ry * cosX - z * sinX) * scale;
+      return { x: sx, y: sy };
+    }
+
+    function drawBox3D(ctx, x0, y0, z0, x1, y1, z1, cx, cy, scale, topColor, sideColor, strokeColor) {
+      const p = [
+        project3D(x0, y0, z0, cx, cy, scale),
+        project3D(x1, y0, z0, cx, cy, scale),
+        project3D(x1, y1, z0, cx, cy, scale),
+        project3D(x0, y1, z0, cx, cy, scale),
+        project3D(x0, y0, z1, cx, cy, scale),
+        project3D(x1, y0, z1, cx, cy, scale),
+        project3D(x1, y1, z1, cx, cy, scale),
+        project3D(x0, y1, z1, cx, cy, scale)
+      ];
+
+      const faces = [
+        [0, 1, 5, 4],
+        [1, 2, 6, 5],
+        [2, 3, 7, 6],
+        [3, 0, 4, 7]
+      ];
+      ctx.fillStyle = sideColor;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1;
+      faces.forEach((f) => {
+        ctx.beginPath();
+        ctx.moveTo(p[f[0]].x, p[f[0]].y);
+        ctx.lineTo(p[f[1]].x, p[f[1]].y);
+        ctx.lineTo(p[f[2]].x, p[f[2]].y);
+        ctx.lineTo(p[f[3]].x, p[f[3]].y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      ctx.fillStyle = topColor;
+      ctx.beginPath();
+      ctx.moveTo(p[4].x, p[4].y);
+      ctx.lineTo(p[5].x, p[5].y);
+      ctx.lineTo(p[6].x, p[6].y);
+      ctx.lineTo(p[7].x, p[7].y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawCad() {
+      const ctx = cadCanvas.getContext("2d");
+      const w = cadCanvas.width, h = cadCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const explode = parseFloat(document.getElementById("explodeSlider").value) * 0.32;
+      const cx = w * 0.5, cy = h * 0.56;
+      const scale = 2.75;
+
+      // 1. Bottom Case (74.8 x 90.8 x 14mm)
+      drawBox3D(ctx, -37.4, -45.4, -14 - explode, 37.4, 45.4, -explode, cx, cy, scale, "#1e293b", "#0f172a", "#475569");
+
+      // 2. KiCad 2-Layer PCB (68 x 84 x 1.6mm)
+      drawBox3D(ctx, -34, -42, 0, 34, 42, 1.6, cx, cy, scale, "#064e3b", "#022c22", "#10b981");
+
+      // XIAO RP2040 + OLED + EC11 on top of PCB
+      drawBox3D(ctx, -27, -39, 1.6, -9, -18, 5.0, cx, cy, scale, "#1d4ed8", "#1e3a8a", "#60a5fa");
+      drawBox3D(ctx, -6, -36, 1.6, 14, -24, 5.2, cx, cy, scale, "#020617", "#0f172a", "#38bdf8");
+      drawBox3D(ctx, 16, -36, 1.6, 28, -24, 18.0, cx, cy, scale, "#94a3b8", "#475569", "#e2e8f0");
+
+      // 3. Switch Plate (74.8 x 90.8 x 3mm)
+      const zPlate = 8 + explode * 0.9;
+      drawBox3D(ctx, -37.4, -45.4, zPlate, 37.4, 45.4, zPlate + 3.0, cx, cy, scale, "rgba(30, 58, 138, 0.78)", "rgba(15, 23, 42, 0.85)", "#60a5fa");
+
+      // 4. 3x3 Cherry MX Switches + DSA Keycaps
+      const zCap = 14 + explode * 1.75;
+      const pitch = 19.05;
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const kx = (c - 1) * pitch;
+          const ky = -4 + r * pitch;
+          drawBox3D(ctx, kx - 7.2, ky - 7.2, zCap, kx + 7.2, ky + 7.2, zCap + 7.5, cx, cy, scale, "#334155", "#1e293b", "#38bdf8");
+        }
+      }
+
+      // Labels
+      ctx.fillStyle = "#93c5fd";
+      ctx.font = "11px monospace";
+      ctx.fillText("STACKUP: DSA Keycaps -> 3mm Switch Plate -> 1.6mm FR4 PCB -> 14mm M2 Bottom Case", 14, 22);
+    }
+
+    // =========================================================================
+    // 2-Layer KiCad PCB Layout Renderer
+    // =========================================================================
+    function drawPcb() {
+      const cvs = document.getElementById("pcbCanvas");
+      const ctx = cvs.getContext("2d");
+      const w = cvs.width, h = cvs.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const showFCu = document.getElementById("chkFCu").checked;
+      const showBCu = document.getElementById("chkBCu").checked;
+      const showSilk = document.getElementById("chkSilk").checked;
+      const showPours = document.getElementById("chkPours").checked;
+
+      const scale = 3.55;
+      const ox = (w - 68 * scale) / 2;
+      const oy = 16;
+
+      // Board substrate
+      ctx.fillStyle = "#051b14";
+      ctx.strokeStyle = "#f59e0b";
+      ctx.lineWidth = 2;
+      ctx.fillRect(ox, oy, 68 * scale, 84 * scale);
+      ctx.strokeRect(ox, oy, 68 * scale, 84 * scale);
+
+      if (showPours) {
+        ctx.fillStyle = "rgba(16, 185, 129, 0.12)";
+        ctx.fillRect(ox + 4, oy + 4, 68 * scale - 8, 84 * scale - 8);
+      }
+
+      const colXs = [14.95, 34.0, 53.05];
+      const rowYs = [34.95, 54.0, 73.05];
+
+      // B.Cu Column tracks
+      if (showBCu) {
+        ctx.strokeStyle = "#3b82f6";
+        ctx.lineWidth = 2.2;
+        colXs.forEach((cx, c) => {
+          ctx.beginPath();
+          ctx.moveTo(ox + (cx - 3.81) * scale, oy + (rowYs[0] - 2.54) * scale);
+          ctx.lineTo(ox + (cx - 3.81) * scale, oy + (rowYs[2] - 2.54) * scale);
+          ctx.lineTo(ox + 8.38 * scale, oy + (4.38 + c * 2.54) * scale);
+          ctx.stroke();
+        });
+      }
+
+      // F.Cu Row tracks + Diode bridges
+      if (showFCu) {
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 2.2;
+        rowYs.forEach((ry) => {
+          ctx.beginPath();
+          ctx.moveTo(ox + (colXs[0] + 4.85) * scale, oy + (ry - 5.08) * scale);
+          ctx.lineTo(ox + (colXs[2] + 4.85) * scale, oy + (ry - 5.08) * scale);
+          ctx.stroke();
+        });
+      }
+
+      // 3x3 MX footprints + Diodes
+      rowYs.forEach((ry, r) => {
+        colXs.forEach((cx, c) => {
+          const sx = ox + cx * scale;
+          const sy = oy + ry * scale;
+          if (showSilk) {
+            ctx.strokeStyle = "rgba(248, 250, 252, 0.65)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(sx - 7 * scale, sy - 7 * scale, 14 * scale, 14 * scale);
+          }
+          // Center stem NPTH
+          ctx.fillStyle = "#080c14";
+          ctx.beginPath();
+          ctx.arc(sx, sy, 2.0 * scale, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Switch pads
+          ctx.fillStyle = "#eab308";
+          ctx.beginPath();
+          ctx.arc(sx - 3.81 * scale, sy - 2.54 * scale, 1.25 * scale, 0, Math.PI * 2);
+          ctx.arc(sx + 2.54 * scale, sy - 5.08 * scale, 1.25 * scale, 0, Math.PI * 2);
+          ctx.fill();
+
+          // SOD-123 Diode
+          const dx = sx + 6.5 * scale;
+          const dy = sy - 5.08 * scale;
+          ctx.fillStyle = "#ef4444";
+          ctx.fillRect(dx - 2.1 * scale, dy - 0.6 * scale, 1.1 * scale, 1.2 * scale);
+          ctx.fillRect(dx + 1.0 * scale, dy - 0.6 * scale, 1.1 * scale, 1.2 * scale);
+        });
+      });
+
+      // Top Modules: XIAO RP2040, OLED, EC11
+      if (showSilk) {
+        ctx.strokeStyle = "#f8fafc";
+        ctx.strokeRect(ox + 7 * scale, oy + 1.5 * scale, 18 * scale, 21 * scale);
+        ctx.strokeRect(ox + 27 * scale, oy + 6 * scale, 18 * scale, 12 * scale);
+        ctx.strokeRect(ox + 49.8 * scale, oy + 5.4 * scale, 12.4 * scale, 13.2 * scale);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "10px monospace";
+        ctx.fillText("U1:XIAO", ox + 9 * scale, oy + 12 * scale);
+        ctx.fillText("U2:OLED", ox + 29 * scale, oy + 12 * scale);
+        ctx.fillText("SW10:EC11", ox + 50.5 * scale, oy + 12 * scale);
+      }
+    }
+
+    function switchMode(mode) {
+      const isCad = mode === "cad";
+      document.getElementById("cadCanvas").style.display = isCad ? "block" : "none";
+      document.getElementById("cadControls").style.display = isCad ? "flex" : "none";
+      document.getElementById("pcbCanvas").style.display = isCad ? "none" : "block";
+      document.getElementById("pcbControls").style.display = isCad ? "none" : "flex";
+      document.getElementById("btnViewCad").classList.toggle("active", isCad);
+      document.getElementById("btnViewPcb").classList.toggle("active", !isCad);
+      if (isCad) drawCad();
+      else drawPcb();
+    }
+
+    renderKeys();
+    drawCad();
+  </script>
+</body>
+</html>
