@@ -8,7 +8,6 @@ I designed and built **AarivPad** for the Hack Club Stardance **Hackpad** missio
 
 Alongside the complete KiCad 8 schematic, 2-layer routed PCB, JLCPCB Gerber archive, parametric OpenSCAD enclosure STLs, and CircuitPython KMK firmware, I also built an interactive browser workbench at [https://aariv.me/hackpad/](https://aariv.me/hackpad/) so you can test all 9 keys across all 3 macro layers, spin the EC11 encoder, inspect the 2-layer copper traces, and orbit the exploded 3D CAD assembly directly in your browser.
 
----
 
 ## Why I Built This
 
@@ -19,7 +18,6 @@ I wanted a compact desk companion that sits right next to my mouse and gives me:
 2. **A physical EC11 rotary encoder** at the top-right corner so I can scrub timelines, adjust volume, or zoom in and out of KiCad/CAD viewports with tactile detents.
 3. **A crisp 128x32 SSD1306 OLED screen** at the top-left so I never have to guess which macro layer (`L0: GIT/DEV`, `L1: MEDIA/RGB`, or `L2: KICAD/CAD`) is currently active.
 
----
 
 ## Features & How It Works Under the Hood
 
@@ -38,9 +36,8 @@ I wrote the firmware in CircuitPython using **KMK** (`kmk_keyboard`, `Layers`, `
 
 ### 3. 2-Layer 68mm x 84mm PCB & Parametric OpenSCAD Enclosure
 - **KiCad 8 PCB (`pcb/aarivpad.kicad_pcb`)**: Routed on a compact `68.0mm x 84.0mm` two-layer board with `1.6mm` FR4 thickness, rounded `3.0mm` corners, four `M2` mounting holes (`4.0mm` inset), `0.25mm` signal traces (`0.50mm` power rails), and stitched `GND` copper pours on both `F.Cu` and `B.Cu`.
-- **3D-Printable Case (`cad/aarivpad_case.scad`)**: Includes a heat-set `M2` bottom tray (`bottom_case.stl`), a `1.5mm`/`3.0mm` clip-in MX switch plate (`switch_plate.stl`) with a framed viewport over the OLED and clearance for the EC11 bushing, and a knurled `6.0mm` D-shaft knob (`encoder_knob.stl`). Total print weight is `~58g` PLA—well under the 300g Printing Legion limit.
+- **3D-Printable Case (`cad/aarivpad_case.scad`)**: Includes a heat-set `M2` bottom tray (`bottom_case.stl`), a `1.5mm`/`3.0mm` clip-in MX switch plate (`switch_plate.stl`) with a framed viewport over the OLED and clearance for the EC11 bushing, and a knurled `6.0mm` D-shaft knob (`encoder_knob.stl`). Total print weight is `~58g` PLA - well under the 300g Printing Legion limit.
 
----
 
 ## What Was Tricky to Build
 
@@ -49,7 +46,6 @@ I wrote the firmware in CircuitPython using **KMK** (`kmk_keyboard`, `Layers`, `
 2. **Preventing Mechanical Interference Between the OLED Header and Top Switch Row**:
    On a tight `68mm x 84mm` board, placing the XIAO RP2040, the 0.91" OLED module, and the EC11 rotary encoder along the top header zone required carefully offsetting the OLED center to `(22.0mm, 14.5mm)` and the EC11 shaft to `(52.5mm, 14.5mm)` so the top switch row (`SW1..SW3` at `Y = 34.0mm`) clears both the OLED PCB edge and the 18mm knurled encoder knob with zero keycap rub.
 
----
 
 ## XIAO RP2040 Pinout & Matrix Wiring
 
@@ -68,7 +64,6 @@ I wrote the firmware in CircuitPython using **KMK** (`kmk_keyboard`, `Layers`, `
 | `D10 / GPIO3` | `ENC_SW` | EC11 Push Switch + SK6812 RGB Underglow Chain |
 | `3V3 / 5V / GND` | Power | OLED `VCC` (`3V3`), SK6812 `VDD` (`5V`), Common Ground |
 
----
 
 ## Bill of Materials (Hackpad Kit Compatible)
 
@@ -83,7 +78,6 @@ I wrote the firmware in CircuitPython using **KMK** (`kmk_keyboard`, `Layers`, `
 | `K1-K9` | 9 | 1u Blank DSA PBT Keycaps | Standard MX Stem |
 | `H1-H4` | 4 | M2x8mm Screws + M2x5mm Brass Heat-Set Inserts | 2.2mm Mounting Holes |
 
----
 
 ## Repository Structure & How to Explore It
 
